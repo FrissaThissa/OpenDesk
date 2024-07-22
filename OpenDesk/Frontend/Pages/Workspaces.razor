@@ -4,14 +4,29 @@
 
 <h3>Workspaces</h3>
 
-@{
-    if(workspaces != null)
-    {
-        foreach (Workspace workspace in workspaces)
-        {
-            <div>
-                @workspace.Name
-            </div>
-        }
-    }
-}
+<div class="row">
+    <div class="col-sm-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (workspaces != null)
+                    {
+                        foreach (Workspace workspace in workspaces)
+                        {
+                            <tr>
+                                <td>@workspace.Id</td>
+                                <td>@workspace.Name</td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
