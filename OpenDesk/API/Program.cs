@@ -20,6 +20,16 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    // Run migrations at startup
+    var db = scope.ServiceProvider.GetRequiredService<OpenDeskContext>();
+    db.Database.Migrate();
+    // Add SeedData
+    var services = scope.ServiceProvider;
+    SeedData.Initialize(services);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
