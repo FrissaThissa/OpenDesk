@@ -1,6 +1,8 @@
 ﻿using API.Services;
+using API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Models;
+using System.Diagnostics;
 
 namespace API.Controllers;
 
@@ -8,22 +10,28 @@ namespace API.Controllers;
 [ApiController]
 public class WorkspaceController : ControllerBase
 {
-    private readonly WorkspaceService _workspaceService;
+    private readonly IWorkspaceService _workspaceService;
 
-    public WorkspaceController(WorkspaceService workspaceService)
+    public WorkspaceController(IWorkspaceService workspaceService)
     {
         _workspaceService = workspaceService;
     }
 
     [HttpGet]
-    public async Task<IEnumerable<Workspace>> Get()
+    public async Task<IActionResult> Get()
     {
-        return await _workspaceService.GetAllWorkspacesAsync();
+        IEnumerable<Workspace> workspaces = await _workspaceService.GetAllWorkspacesAsync();
+
+        return Ok(workspaces);
     }
 
-    [HttpGet]
-    public async Task<Workspace?> GetWorkspaceById(int id)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetWorkspaceById(int id)
     {
-        return await _workspaceService.GetWorkspaceByIdAsync(id);
+        Workspace? workspace = await _workspaceService.GetWorkspaceByIdAsync(id);
+        if (workspace == null)
+            return NotFound();
+
+        return Ok(workspace);
     }
 }

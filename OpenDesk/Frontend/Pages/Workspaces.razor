@@ -1,0 +1,17 @@
+﻿@using Shared.Models;
+
+@page "/Workspaces"
+
+<h3>Workspaces</h3>
+
+@{
+    if(workspaces != null)
+    {
+        foreach (Workspace workspace in workspaces)
+        {
+            <div>
+                @workspace.Name
+            </div>
+        }
+    }
+}
