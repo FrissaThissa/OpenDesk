@@ -1,5 +1,6 @@
 ﻿using API.Services;
 using API.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Models;
 using System.Diagnostics;
@@ -18,6 +19,7 @@ public class WorkspaceController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> Get()
     {
         IEnumerable<Workspace> workspaces = await _workspaceService.GetAllWorkspacesAsync();

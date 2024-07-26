@@ -1,14 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Shared.Models;
 
 namespace API.Data;
 
-public class OpenDeskContext : DbContext
+public class OpenDeskContext : IdentityDbContext<IdentityUser>
 {
     public OpenDeskContext(DbContextOptions<OpenDeskContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Workspace>()
             .HasMany(w => w.Boards)
             .WithOne(b => b.Workspace)
