@@ -8,13 +8,13 @@ namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class WorkspaceController : BaseController
+public class CardController : BaseController
 {
-    private readonly IWorkspaceService _workspaceService;
+    private readonly ICardService _cardService;
 
-    public WorkspaceController(IWorkspaceService workspaceService, IUserService userService) : base(userService)
+    public CardController(ICardService cardService, IUserService userService) : base(userService)
     {
-        _workspaceService = workspaceService;
+        _cardService = cardService;
     }
 
     [HttpGet]
@@ -25,47 +25,47 @@ public class WorkspaceController : BaseController
         if (user == null)
             return Forbid();
 
-        IEnumerable<WorkspaceDto> workspaces = await _workspaceService.GetAllWorkspacesDtoAsync(user);
+        IEnumerable<CardDto> cards = await _cardService.GetAllCardsDtoAsync(user);
 
-        return Ok(workspaces);
+        return Ok(cards);
     }
 
     [HttpGet("{id}")]
     [Authorize]
-    public async Task<IActionResult> GetWorkspaceById(int id)
+    public async Task<IActionResult> GetCardById(int id)
     {
         ApplicationUser? user = await GetCurrentUserAsync();
         if (user == null)
             return Forbid();
 
-        WorkspaceDto? workspace = await _workspaceService.GetWorkspaceDtoByIdAsync(id, user);
-        if (workspace == null)
+        CardDto? card = await _cardService.GetCardDtoByIdAsync(id, user);
+        if (card == null)
             return NotFound();
 
-        return Ok(workspace);
+        return Ok(card);
     }
 
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> Create(WorkspaceDto workspace)
+    public async Task<IActionResult> Create(CardDto card)
     {
         ApplicationUser? user = await GetCurrentUserAsync();
         if (user == null)
             return Forbid();
 
-        await _workspaceService.CreateWorkspaceAsync(workspace, user);
+        await _cardService.CreateCardAsync(card, user);
         return Ok();
     }
 
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<IActionResult> Edit(int id, WorkspaceDto workspace)
+    public async Task<IActionResult> Edit(CardDto card)
     {
         ApplicationUser? user = await GetCurrentUserAsync();
         if (user == null)
             return Forbid();
 
-        await _workspaceService.EditWorkspaceAsync(workspace, user);
+        await _cardService.EditCardAsync(card, user);
         return Ok();
     }
 
@@ -77,7 +77,7 @@ public class WorkspaceController : BaseController
         if (user == null)
             return Forbid();
 
-        await _workspaceService.DeleteWorkspaceAsync(id, user);
+        await _cardService.DeleteCardAsync(id, user);
         return Ok();
     }
 }

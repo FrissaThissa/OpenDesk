@@ -12,8 +12,8 @@ public class WorkspaceService
         _httpClient = httpClient;
     }
 
-    public async Task<IEnumerable<Workspace>?> GetWorkspacesAsync()
+    public async Task<IEnumerable<WorkspaceDto>?> GetWorkspacesAsync()
     {
-        return await _httpClient.GetFromJsonAsync<IEnumerable<Workspace>>("api/Workspace");
+        return await _httpClient.GetFromJsonAsync<IEnumerable<WorkspaceDto>>("api/Workspace");
     }
 }

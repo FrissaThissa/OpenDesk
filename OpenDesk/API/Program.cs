@@ -1,7 +1,7 @@
 using API.Data;
+using API.Models;
 using API.Services;
 using API.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
         });
 });
 builder.Services.AddAuthorization();
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
     .AddEntityFrameworkStores<OpenDeskContext>();
 builder.Services.AddControllers();
 builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
@@ -55,7 +55,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapIdentityApi<IdentityUser>();
+app.MapIdentityApi<ApplicationUser>();
 
 app.UseHttpsRedirection();
 
