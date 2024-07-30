@@ -19,7 +19,7 @@
                     {
                         foreach (WorkspaceDto workspace in workspaces)
                         {
-                            <tr>
+                            <tr @onclick="() => NavigateToBoards(workspace.Id)">
                                 <td>@workspace.Id</td>
                                 <td>@workspace.Name</td>
                             </tr>

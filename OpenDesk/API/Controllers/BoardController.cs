@@ -36,6 +36,14 @@ public class BoardController : ControllerBase
         return Ok(board);
     }
 
+    [HttpGet("workspace/{workspaceId}")]
+    [Authorize]
+    public async Task<IActionResult> GetBoardsByWorkspaceId(int workspaceId)
+    {
+        var boards = await _boardService.GetBoardsDtoByWorkspaceIdAsync(workspaceId);
+        return Ok(boards);
+    }
+
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Create(BoardDto board)

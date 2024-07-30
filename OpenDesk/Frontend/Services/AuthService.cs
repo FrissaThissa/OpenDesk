@@ -41,7 +41,8 @@ public class AuthService
         }
         catch (Exception ex)
         {
-            request.ErrorMessage = $"An error occurred: {ex.Message}";
+            request.ErrorMessage = "Login failed. Please try again later.";
+            //TODO: Log error
         }
     }
 }

@@ -7,16 +7,17 @@ namespace Frontend.Pages;
 public partial class Workspaces
 {
     [Inject] public WorkspaceService WorkspaceService { get; set; } = default!;
+    [Inject] public NavigationManager NavigationManager { get; set; } = default!;
 
     private IEnumerable<WorkspaceDto>? workspaces = default!;
 
     protected override async Task OnParametersSetAsync()
     {
-        this.workspaces = await GetWorkspacesAsync();
+        this.workspaces = await WorkspaceService.GetWorkspacesAsync();
     }
 
-    public async Task<IEnumerable<WorkspaceDto>?> GetWorkspacesAsync()
+    private void NavigateToBoards(int workspaceId)
     {
-        return await WorkspaceService.GetWorkspacesAsync();
+        NavigationManager.NavigateTo($"/boards/{workspaceId}");
     }
 }

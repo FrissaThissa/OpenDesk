@@ -1,4 +1,5 @@
 ﻿using API.Models.Auth;
+using API.Services;
 using API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +35,14 @@ public class CardController : ControllerBase
             return NotFound();
 
         return Ok(card);
+    }
+
+    [HttpGet("board/{boardId}")]
+    [Authorize]
+    public async Task<IActionResult> GetCardsByBoardId(int boardId)
+    {
+        var boards = await _cardService.GetCardsDtoByBoardIdAsync(boardId);
+        return Ok(boards);
     }
 
     [HttpPost]
