@@ -3,29 +3,41 @@ using API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using API.Models;
 using Shared.Models;
+using API.Models.Auth;
 
 namespace API.Services;
 
-public class CardService : ICardService
+public class CardService : ServiceBase, ICardService
 {
     private readonly OpenDeskContext _context;
 
-    public CardService(OpenDeskContext context)
+    public CardService(OpenDeskContext context, IHttpContextAccessor httpContextAccessor, IUserService userService) 
+        : base(httpContextAccessor, userService)
     {
         _context = context;
     }
 
-    public async Task<IEnumerable<CardDto>> GetAllCardsDtoAsync(ApplicationUser user)
+    public async Task<IEnumerable<CardDto>?> GetAllCardsDtoAsync()
     {
-        List<Card> cards = await _context.Cards.Where(c => c.OwnerId == user.Id)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        List<Card> cards = await _context.Cards.Include(c => c.CreatedBy)
+            .Where(c => c.Board.Members.Any(m => m.UserId == user.Id))
             .ToListAsync();
 
         return ConvertListToDto(cards);
     }
 
-    public async Task<CardDto?> GetCardDtoByIdAsync(int id, ApplicationUser user)
+    public async Task<CardDto?> GetCardDtoByIdAsync(int id)
     {
-        Card? card = await _context.Cards.Where(c => c.OwnerId == user.Id)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        Card? card = await _context.Cards.Include(c => c.CreatedBy)
+            .Where(c => c.Board.Members.Any(m => m.UserId == user.Id))
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if (card == null)
@@ -34,39 +46,53 @@ public class CardService : ICardService
         return ConvertObjectToDto(card);
     }
 
-    public async Task<IEnumerable<CardDto>> GetCardsDtoByBoardIdAsync(int id, ApplicationUser user)
+    public async Task<IEnumerable<CardDto>?> GetCardsDtoByBoardIdAsync(int id)
     {
-        List<Card> cards =  await _context.Cards.Where(c => c.BoardId == id)
-            .Where(c => c.OwnerId == user.Id)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        List<Card> cards =  await _context.Cards.Include(c => c.CreatedBy)
+            .Where(c => c.BoardId == id)
+            .Where(c => c.Board.Members.Any(m => m.UserId == user.Id))
             .ToListAsync();
 
         return ConvertListToDto(cards);
     }
 
-    public async Task<IEnumerable<CardDto>> GetCardsDtoByWorkspaceIdAsync(int id, ApplicationUser user)
+    public async Task<IEnumerable<CardDto>?> GetCardsDtoByWorkspaceIdAsync(int id)
     {
-        List<Card> cards =  await _context.Cards.Where(c => c.Board.WorkspaceId == id)
-            .Where(c => c.OwnerId == user.Id)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        List<Card> cards =  await _context.Cards.Include(c => c.CreatedBy)
+            .Where(c => c.Board.WorkspaceId == id)
+            .Where(c => c.Board.Members.Any(m => m.UserId == user.Id))
             .ToListAsync();
 
         return ConvertListToDto(cards);
     }
 
-    public async Task CreateCardAsync(CardDto dto, ApplicationUser user)
+    public async Task CreateCardAsync(CardDto dto)
     {
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return;
+
         Card card = ConvertDtoToObject(dto);
 
-        card.Owner = user;
+        card.CreatedBy = user;
 
         _context.Cards.Add(card);
         await _context.SaveChangesAsync();
     }
 
-    public async Task EditCardAsync(CardDto dto, ApplicationUser user)
+    public async Task EditCardAsync(CardDto dto)
     {
         Card card = ConvertDtoToObject(dto);
 
-        Card? dbCard = await GetCardByIdAsync(card.Id, user);
+        Card? dbCard = await GetCardByIdAsync(card.Id);
         if (dbCard == null)
             return;
 
@@ -74,9 +100,9 @@ public class CardService : ICardService
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteCardAsync(int id, ApplicationUser user)
+    public async Task DeleteCardAsync(int id)
     {
-        Card? card = await GetCardByIdAsync(id, user);
+        Card? card = await GetCardByIdAsync(id);
         if (card == null)
             return;
 
@@ -84,9 +110,14 @@ public class CardService : ICardService
         await _context.SaveChangesAsync();
     }
 
-    private async Task<Card?> GetCardByIdAsync(int id, ApplicationUser user)
+    private async Task<Card?> GetCardByIdAsync(int id)
     {
-        return await _context.Cards.Where(c => c.OwnerId == user.Id)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        return await _context.Cards.Include(c => c.CreatedBy)
+            .Where(c => c.Board.Members.Any(m => m.UserId == user.Id))
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
@@ -98,8 +129,12 @@ public class CardService : ICardService
             Title = card.Title,
             Description = card.Description,
             CreatedDate = card.CreatedDate,
-            OwnerId = card.Owner.Id,
-            OwnerEmail = card.Owner.Email
+            CreatedBy = new UserDto()
+            {
+                Id = card.CreatedBy.Id,
+                Name = card.CreatedBy.UserName,
+                Email = card.CreatedBy.Email
+            }
         };
         return dto;
     }
@@ -116,8 +151,7 @@ public class CardService : ICardService
             Id = dto.Id,
             Title = dto.Title,
             Description = dto.Description,
-            CreatedDate = dto.CreatedDate,
-            OwnerId = dto.OwnerId
+            CreatedDate = dto.CreatedDate
         };
         return card;
     }

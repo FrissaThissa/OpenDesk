@@ -1,4 +1,4 @@
-﻿using API.Models;
+﻿using API.Models.Auth;
 using API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,11 +8,11 @@ namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CardController : BaseController
+public class CardController : ControllerBase
 {
     private readonly ICardService _cardService;
 
-    public CardController(ICardService cardService, IUserService userService) : base(userService)
+    public CardController(ICardService cardService, IUserService userService)
     {
         _cardService = cardService;
     }
@@ -21,12 +21,7 @@ public class CardController : BaseController
     [Authorize]
     public async Task<IActionResult> Get()
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        IEnumerable<CardDto> cards = await _cardService.GetAllCardsDtoAsync(user);
-
+        IEnumerable<CardDto>? cards = await _cardService.GetAllCardsDtoAsync();
         return Ok(cards);
     }
 
@@ -34,11 +29,7 @@ public class CardController : BaseController
     [Authorize]
     public async Task<IActionResult> GetCardById(int id)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        CardDto? card = await _cardService.GetCardDtoByIdAsync(id, user);
+        CardDto? card = await _cardService.GetCardDtoByIdAsync(id);
         if (card == null)
             return NotFound();
 
@@ -49,11 +40,7 @@ public class CardController : BaseController
     [Authorize]
     public async Task<IActionResult> Create(CardDto card)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        await _cardService.CreateCardAsync(card, user);
+        await _cardService.CreateCardAsync(card);
         return Ok();
     }
 
@@ -61,11 +48,7 @@ public class CardController : BaseController
     [Authorize]
     public async Task<IActionResult> Edit(CardDto card)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        await _cardService.EditCardAsync(card, user);
+        await _cardService.EditCardAsync(card);
         return Ok();
     }
 
@@ -73,11 +56,7 @@ public class CardController : BaseController
     [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        await _cardService.DeleteCardAsync(id, user);
+        await _cardService.DeleteCardAsync(id);
         return Ok();
     }
 }

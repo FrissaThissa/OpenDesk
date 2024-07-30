@@ -3,31 +3,44 @@ using API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using API.Models;
 using Shared.Models;
+using API.Models.Auth;
+using API.Extensions;
 
 namespace API.Services;
 
-public class BoardService : IBoardService
+public class BoardService : ServiceBase, IBoardService
 {
     private readonly OpenDeskContext _context;
 
-    public BoardService(OpenDeskContext context)
+    public BoardService(OpenDeskContext context, IHttpContextAccessor httpContextAccessor, IUserService userService) 
+        : base(httpContextAccessor, userService)
     {
         _context = context;
     }
 
-    public async Task<IEnumerable<BoardDto>> GetAllBoardsDtoAsync(ApplicationUser user)
+    public async Task<IEnumerable<BoardDto>?> GetAllBoardsDtoAsync()
     {
-        List<Board> boards = await _context.Boards.Include(b => b.Cards)
-            .Where(b => b.OwnerId == user.Id)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        List<Board> boards = await _context.Boards.Include(b => b.CreatedBy)
+            .Include(b => b.Cards)
+            .Where(b => b.Members.Any(m => m.UserId == user.Id))
             .ToListAsync();
 
         return ConvertListToDto(boards);
     }
 
-    public async Task<BoardDto?> GetBoardDtoByIdAsync(int id, ApplicationUser user)
+    public async Task<BoardDto?> GetBoardDtoByIdAsync(int id)
     {
-        Board? board = await _context.Boards.Include(b => b.Cards)
-            .Where(b => b.OwnerId == user.Id)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        Board? board = await _context.Boards.Include(b => b.CreatedBy)
+            .Include(b => b.Cards)
+            .Where(b => b.Members.Any(m => m.UserId == user.Id))
             .FirstOrDefaultAsync(b => b.Id == id);
 
         if (board == null)
@@ -36,30 +49,45 @@ public class BoardService : IBoardService
         return ConvertObjectToDto(board);
     }
 
-    public async Task<IEnumerable<BoardDto?>> GetBoardsDtoByWorkspaceIdAsync(int id, ApplicationUser user)
+    public async Task<IEnumerable<BoardDto>?> GetBoardsDtoByWorkspaceIdAsync(int id)
     {
-        List<Board> boards = await _context.Boards.Where(b => b.WorkspaceId == id)
-            .Where(b => b.OwnerId == user.Id)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        List<Board> boards = await _context.Boards.Include(b => b.CreatedBy)
+            .Where(b => b.WorkspaceId == id)
+            .Where(b => b.Members.Any(m => m.UserId == user.Id))
             .ToListAsync();
 
         return ConvertListToDto(boards);
     }
 
-    public async Task CreateBoardAsync(BoardDto dto, ApplicationUser user)
+    public async Task CreateBoardAsync(BoardDto dto)
     {
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return;
+
         Board board = ConvertDtoToObject(dto);
-
-        board.Owner = user;
-
+        board.CreatedBy = user;
         _context.Boards.Add(board);
+
+        BoardMember member = new BoardMember()
+        {
+            Board = board,
+            User = user
+        };
+        _context.BoardMembers.Add(member);
+
         await _context.SaveChangesAsync();
     }
 
-    public async Task EditBoardAsync(BoardDto dto, ApplicationUser user)
+    public async Task EditBoardAsync(BoardDto dto)
     {
         Board board = ConvertDtoToObject(dto);
 
-        Board? dbBoard = await GetBoardByIdAsync(board.Id, user);
+        Board? dbBoard = await GetBoardByIdAsync(board.Id);
         if (dbBoard == null)
             return;
 
@@ -67,9 +95,9 @@ public class BoardService : IBoardService
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteBoardAsync(int id, ApplicationUser user)
+    public async Task DeleteBoardAsync(int id)
     {
-        Board? board = await GetBoardByIdAsync(id, user);
+        Board? board = await GetBoardByIdAsync(id);
         if (board == null)
             return;
 
@@ -77,10 +105,15 @@ public class BoardService : IBoardService
         await _context.SaveChangesAsync();
     }
 
-    private async Task<Board?> GetBoardByIdAsync(int id, ApplicationUser user)
+    private async Task<Board?> GetBoardByIdAsync(int id)
     {
-        return await _context.Boards.Include(b => b.Cards)
-            .Where(b => b.OwnerId == user.Id)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        return await _context.Boards.Include(b => b.CreatedBy)
+            .Include(b => b.Cards)
+            .Where(b => b.Members.Any(m => m.UserId == user.Id))
             .FirstOrDefaultAsync(b => b.Id == id);
     }
 
@@ -90,8 +123,12 @@ public class BoardService : IBoardService
         {
             Id = board.Id,
             Name = board.Name,
-            OwnerId = board.Owner.Id,
-            OwnerEmail = board.Owner.Email
+            CreatedBy = new UserDto()
+            {
+                Id = board.CreatedBy.Id,
+                Name = board.CreatedBy.UserName,
+                Email = board.CreatedBy.Email
+            }
         };
         return dto;
     }
@@ -106,8 +143,7 @@ public class BoardService : IBoardService
         Board board = new Board()
         {
             Id = dto.Id,
-            Name = dto.Name,
-            OwnerId = dto.OwnerId
+            Name = dto.Name
         };
         return board;
     }

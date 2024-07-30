@@ -1,4 +1,4 @@
-﻿using API.Models;
+﻿using API.Models.Auth;
 using API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,11 +8,11 @@ namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class BoardController : BaseController
+public class BoardController : ControllerBase
 {
     private readonly IBoardService _boardService;
 
-    public BoardController(IBoardService boardService, IUserService userService) : base(userService)
+    public BoardController(IBoardService boardService, IUserService userService) 
     {
         _boardService = boardService;
     }
@@ -21,12 +21,7 @@ public class BoardController : BaseController
     [Authorize]
     public async Task<IActionResult> Get()
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        IEnumerable<BoardDto> boards = await _boardService.GetAllBoardsDtoAsync(user);
-
+        IEnumerable<BoardDto>? boards = await _boardService.GetAllBoardsDtoAsync();
         return Ok(boards);
     }
 
@@ -34,11 +29,7 @@ public class BoardController : BaseController
     [Authorize]
     public async Task<IActionResult> GetBoardById(int id)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        BoardDto? board = await _boardService.GetBoardDtoByIdAsync(id, user);
+        BoardDto? board = await _boardService.GetBoardDtoByIdAsync(id);
         if (board == null)
             return NotFound();
 
@@ -49,11 +40,7 @@ public class BoardController : BaseController
     [Authorize]
     public async Task<IActionResult> Create(BoardDto board)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        await _boardService.CreateBoardAsync(board, user);
+        await _boardService.CreateBoardAsync(board);
         return Ok();
     }
 
@@ -61,11 +48,7 @@ public class BoardController : BaseController
     [Authorize]
     public async Task<IActionResult> Edit(int id, BoardDto board)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        await _boardService.EditBoardAsync(board, user);
+        await _boardService.EditBoardAsync(board);
         return Ok();
     }
 
@@ -73,11 +56,7 @@ public class BoardController : BaseController
     [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        await _boardService.DeleteBoardAsync(id, user);
+        await _boardService.DeleteBoardAsync(id);
         return Ok();
     }
 }

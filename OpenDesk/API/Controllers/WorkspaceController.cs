@@ -1,4 +1,4 @@
-﻿using API.Models;
+﻿using API.Models.Auth;
 using API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,11 +8,11 @@ namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class WorkspaceController : BaseController
+public class WorkspaceController : ControllerBase
 {
     private readonly IWorkspaceService _workspaceService;
 
-    public WorkspaceController(IWorkspaceService workspaceService, IUserService userService) : base(userService)
+    public WorkspaceController(IWorkspaceService workspaceService, IUserService userService)
     {
         _workspaceService = workspaceService;
     }
@@ -21,12 +21,7 @@ public class WorkspaceController : BaseController
     [Authorize]
     public async Task<IActionResult> Get()
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        IEnumerable<WorkspaceDto> workspaces = await _workspaceService.GetAllWorkspacesDtoAsync(user);
-
+        IEnumerable<WorkspaceDto>? workspaces = await _workspaceService.GetAllWorkspacesDtoAsync();
         return Ok(workspaces);
     }
 
@@ -34,11 +29,7 @@ public class WorkspaceController : BaseController
     [Authorize]
     public async Task<IActionResult> GetWorkspaceById(int id)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        WorkspaceDto? workspace = await _workspaceService.GetWorkspaceDtoByIdAsync(id, user);
+        WorkspaceDto? workspace = await _workspaceService.GetWorkspaceDtoByIdAsync(id);
         if (workspace == null)
             return NotFound();
 
@@ -49,11 +40,7 @@ public class WorkspaceController : BaseController
     [Authorize]
     public async Task<IActionResult> Create(WorkspaceDto workspace)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        await _workspaceService.CreateWorkspaceAsync(workspace, user);
+        await _workspaceService.CreateWorkspaceAsync(workspace);
         return Ok();
     }
 
@@ -61,11 +48,7 @@ public class WorkspaceController : BaseController
     [Authorize]
     public async Task<IActionResult> Edit(int id, WorkspaceDto workspace)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        await _workspaceService.EditWorkspaceAsync(workspace, user);
+        await _workspaceService.EditWorkspaceAsync(workspace);
         return Ok();
     }
 
@@ -73,11 +56,7 @@ public class WorkspaceController : BaseController
     [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
-        ApplicationUser? user = await GetCurrentUserAsync();
-        if (user == null)
-            return Forbid();
-
-        await _workspaceService.DeleteWorkspaceAsync(id, user);
+        await _workspaceService.DeleteWorkspaceAsync(id);
         return Ok();
     }
 }

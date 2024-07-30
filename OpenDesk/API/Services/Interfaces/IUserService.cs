@@ -1,8 +1,8 @@
-﻿using API.Models;
+﻿using API.Models.Auth;
 
 namespace API.Services.Interfaces;
 
 public interface IUserService
 {
-    public Task<ApplicationUser> GetUserById(string id);
+    public Task<ApplicationUser?> GetUserById(int id);
 }

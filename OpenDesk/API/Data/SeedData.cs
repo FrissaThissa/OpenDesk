@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using API.Models;
+using Microsoft.AspNetCore.Identity;
+using API.Models.Auth;
 
 namespace API.Data;
 
@@ -7,79 +9,101 @@ public static class SeedData
 {
     public static async void Initialize(IServiceProvider serviceProvider)
     {
-        using OpenDeskContext context = new OpenDeskContext(serviceProvider.GetRequiredService<DbContextOptions<OpenDeskContext>>());
-
-        if(context.Workspaces != null && !context.Workspaces.Any())
+        using (var scope = serviceProvider.CreateScope())
         {
-            Workspace workspace = new() { 
-                Name = "Test workspace" 
-            };
-            context.Workspaces.Add(workspace);
+            using OpenDeskContext context = new OpenDeskContext(scope.ServiceProvider.GetRequiredService<DbContextOptions<OpenDeskContext>>());
+            using UserManager<ApplicationUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            using RoleManager<IdentityRole<int>> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
 
-            Board board1 = new()
-            {
-                Name = "Test board 1",
-                Workspace = workspace
-            };
-            context.Boards.Add(board1);
-            Board board2 = new()
-            {
-                Name = "Test board 2",
-                Workspace = workspace
-            };
-            context.Boards.Add(board2);
+            // Ensure the database is created.
+            context.Database.EnsureCreated();
 
-            Card card1 = new()
+            // Check if the admin role exists, and create it if it doesn't.
+            string[] roles = new string[] { "Admin" };
+            foreach (var role in roles)
             {
-                Title = "Test card 1",
-                Description = "This is test card 1 on board 1",
-                CreatedDate = DateTime.Now,
-                Board = board1
-            };
-            context.Cards.Add(card1);
-            Card card2 = new()
-            {
-                Title = "Test card 2",
-                Description = "This is test card 2 on board 1",
-                CreatedDate = DateTime.Now,
-                Board = board1
-            };
-            context.Cards.Add(card2);
-            Card card3 = new()
-            {
-                Title = "Test card 3",
-                Description = "This is test card 3 on board 1",
-                CreatedDate = DateTime.Now,
-                Board = board1
-            };
-            context.Cards.Add(card3);
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole<int>(role));
+                }
+            }
 
-            Card card4 = new()
-            {
-                Title = "Test card 4",
-                Description = "This is test card 1 on board 2",
-                CreatedDate = DateTime.Now,
-                Board = board2
-            };
-            context.Cards.Add(card4);
-            Card card5 = new()
-            {
-                Title = "Test card 5",
-                Description = "This is test card 2 on board 2",
-                CreatedDate = DateTime.Now,
-                Board = board2
-            };
-            context.Cards.Add(card5);
-            Card card6 = new()
-            {
-                Title = "Test card 6",
-                Description = "This is test card 3 on board 2",
-                CreatedDate = DateTime.Now,
-                Board = board2
-            };
-            context.Cards.Add(card6);
+            // Check if the admin user exists, and create it if it doesn't.
+            string adminEmail = "admin@example.com";
+            string adminPassword = "Admin@123";
+            ApplicationUser? admin = userManager.Users.FirstOrDefault(x => x.Email == adminEmail);
 
-            await context.SaveChangesAsync();
+            if (admin == null)
+            {
+                admin = new ApplicationUser { UserName = adminEmail, Email = adminEmail };
+                var result = await userManager.CreateAsync(admin, adminPassword);
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(admin, "Admin");
+                }
+            }
+
+            if (context.Workspaces != null && !context.Workspaces.Any())
+            {
+                Workspace workspace = new()
+                {
+                    Name = "Test workspace",
+                    CreatedById = admin.Id
+                };
+                context.Workspaces.Add(workspace);
+
+                WorkspaceMember workspaceMember = new()
+                {
+                    UserId = admin.Id,
+                    Workspace = workspace
+                };
+                context.WorkspaceMembers.Add(workspaceMember);
+
+                Board board = new()
+                {
+                    Name = "Test board 1",
+                    Workspace = workspace,
+                    CreatedById = admin.Id
+                };
+                context.Boards.Add(board);
+
+                BoardMember boardMember = new()
+                {
+                    UserId = admin.Id,
+                    Board = board
+                };
+                context.BoardMembers.Add(boardMember);
+
+                Card card1 = new()
+                {
+                    Title = "Test card 1",
+                    Description = "This is test card 1",
+                    CreatedDate = DateTime.Now,
+                    Board = board,
+                    CreatedById = admin.Id
+                };
+                context.Cards.Add(card1);
+                Card card2 = new()
+                {
+                    Title = "Test card 2",
+                    Description = "This is test card 2",
+                    CreatedDate = DateTime.Now,
+                    Board = board,
+                    CreatedById = admin.Id
+                };
+                context.Cards.Add(card2);
+                Card card3 = new()
+                {
+                    Title = "Test card 3",
+                    Description = "This is test card 3",
+                    CreatedDate = DateTime.Now,
+                    Board = board,
+                    CreatedById = admin.Id
+                };
+                context.Cards.Add(card3);
+
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

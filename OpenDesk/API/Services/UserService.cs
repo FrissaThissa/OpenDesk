@@ -1,6 +1,7 @@
 ﻿using API.Data;
-using API.Models;
+using API.Models.Auth;
 using API.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
 
@@ -13,8 +14,8 @@ public class UserService : IUserService
         _context = context;
     }
 
-    public async Task<ApplicationUser> GetUserById(string id)
+    public async Task<ApplicationUser?> GetUserById(int id)
     {
-        throw new NotImplementedException();
+        return await _context.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == id);
     }
 }

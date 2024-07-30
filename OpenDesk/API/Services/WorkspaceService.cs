@@ -3,33 +3,45 @@ using API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using API.Models;
 using Shared.Models;
+using API.Models.Auth;
 
 namespace API.Services;
 
-public class WorkspaceService : IWorkspaceService
+public class WorkspaceService : ServiceBase, IWorkspaceService
 {
     private readonly OpenDeskContext _context;
 
-    public WorkspaceService(OpenDeskContext context)
+    public WorkspaceService(OpenDeskContext context, IHttpContextAccessor httpContextAccessor, IUserService userService) 
+        : base(httpContextAccessor, userService)
     {
         _context = context; 
     }
 
-    public async Task<IEnumerable<WorkspaceDto>> GetAllWorkspacesDtoAsync(ApplicationUser user)
+    public async Task<IEnumerable<WorkspaceDto>?> GetAllWorkspacesDtoAsync()
     {
-        List<Workspace> workspaces = await _context.Workspaces.Include(w => w.Boards)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        List<Workspace> workspaces = await _context.Workspaces.Include(w => w.CreatedBy)
+            .Include(w => w.Boards)
             .ThenInclude(b => b.Cards)
-            .Where(w => w.OwnerId == user.Id)
+            .Where(w => w.Members.Any(m => m.UserId == user.Id))
             .ToListAsync();
 
         return ConvertListToDto(workspaces);
     }
 
-    public async Task<WorkspaceDto?> GetWorkspaceDtoByIdAsync(int id, ApplicationUser user)
+    public async Task<WorkspaceDto?> GetWorkspaceDtoByIdAsync(int id)
     {
-        Workspace? workspace = await _context.Workspaces.Include(w => w.Boards)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        Workspace? workspace = await _context.Workspaces.Include(w => w.CreatedBy)
+            .Include(w => w.Boards)
             .ThenInclude(b => b.Cards)
-            .Where(w => w.OwnerId == user.Id)
+            .Where(w => w.Members.Any(m => m.UserId == user.Id))
             .FirstOrDefaultAsync(w => w.Id == id);
 
         if (workspace == null)
@@ -38,21 +50,31 @@ public class WorkspaceService : IWorkspaceService
         return ConvertObjectToDto(workspace);
     }
 
-    public async Task CreateWorkspaceAsync(WorkspaceDto dto, ApplicationUser user)
+    public async Task CreateWorkspaceAsync(WorkspaceDto dto)
     {
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return;
+
         Workspace workspace = ConvertDtoToObject(dto);
-
-        workspace.Owner = user;
-
+        workspace.CreatedBy = user;
         _context.Workspaces.Add(workspace);
+
+        WorkspaceMember member = new WorkspaceMember()
+        {
+            Workspace = workspace,
+            User = user
+        };
+        _context.WorkspaceMembers.Add(member);
+
         await _context.SaveChangesAsync();
     }
 
-    public async Task EditWorkspaceAsync(WorkspaceDto dto, ApplicationUser user)
+    public async Task EditWorkspaceAsync(WorkspaceDto dto)
     {
         Workspace workspace = ConvertDtoToObject(dto);
 
-        Workspace? dbWorkspace = await GetWorkspaceByIdAsync(workspace.Id, user);
+        Workspace? dbWorkspace = await GetWorkspaceByIdAsync(workspace.Id);
         if (dbWorkspace == null)
             return;
 
@@ -60,9 +82,9 @@ public class WorkspaceService : IWorkspaceService
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteWorkspaceAsync(int id, ApplicationUser user)
+    public async Task DeleteWorkspaceAsync(int id)
     {
-        Workspace? workspace = await GetWorkspaceByIdAsync(id, user);
+        Workspace? workspace = await GetWorkspaceByIdAsync(id);
         if (workspace == null)
             return;
 
@@ -70,11 +92,16 @@ public class WorkspaceService : IWorkspaceService
         await _context.SaveChangesAsync();
     }
 
-    private async Task<Workspace?> GetWorkspaceByIdAsync(int id, ApplicationUser user)
+    private async Task<Workspace?> GetWorkspaceByIdAsync(int id)
     {
-        return await _context.Workspaces.Include(w => w.Boards)
+        ApplicationUser? user = await GetCurrentUser();
+        if (user == null)
+            return null;
+
+        return await _context.Workspaces.Include(w => w.CreatedBy)
+            .Include(w => w.Boards)
             .ThenInclude(b => b.Cards)
-            .Where(w => w.OwnerId == user.Id)
+            .Where(w => w.Members.Any(m => m.UserId == user.Id))
             .FirstOrDefaultAsync(w => w.Id == id);
     }
 
@@ -84,8 +111,12 @@ public class WorkspaceService : IWorkspaceService
         {
             Id = workspace.Id,
             Name = workspace.Name,
-            OwnerId = workspace.Owner.Id,
-            OwnerEmail = workspace.Owner.Email
+            CreatedBy = new UserDto()
+            {
+                Id = workspace.CreatedBy.Id,
+                Name = workspace.CreatedBy.UserName,
+                Email = workspace.CreatedBy.Email
+            }
         };
         return dto;
     }
@@ -100,8 +131,7 @@ public class WorkspaceService : IWorkspaceService
         Workspace workspace = new Workspace()
         {
             Id = dto.Id,
-            Name = dto.Name,
-            OwnerId = dto.OwnerId
+            Name = dto.Name
         };
         return workspace;
     }

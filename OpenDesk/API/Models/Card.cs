@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using API.Models.Auth;
 
 namespace API.Models;
 
@@ -11,6 +12,6 @@ public class Card
     public string? Title { get; set; }
     public string? Description { get; set; }
     public DateTime CreatedDate { get; set; }
-    public int OwnerId { get; set; }
-    public ApplicationUser Owner { get; set; } = default!;
+    public int CreatedById { get; set; }
+    public ApplicationUser CreatedBy { get; set; } = default!;
 }

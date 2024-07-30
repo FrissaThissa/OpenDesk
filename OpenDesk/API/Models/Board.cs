@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using API.Models.Auth;
 
 namespace API.Models;
 
@@ -10,6 +11,7 @@ public class Board
     public Workspace Workspace { get; set; } = default!;
     public string? Name { get; set; }
     public List<Card> Cards { get; set; } = default!;
-    public int OwnerId { get; set; }
-    public ApplicationUser Owner { get; set; } = default!;
+    public int CreatedById { get; set; }
+    public ApplicationUser CreatedBy { get; set; } = default!;
+    public List<BoardMember> Members { get; set; } = default!;
 }

@@ -165,14 +165,14 @@ namespace API.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OwnerId = table.Column<int>(type: "int", nullable: false)
+                    CreatedById = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Workspaces", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Workspaces_AspNetUsers_OwnerId",
-                        column: x => x.OwnerId,
+                        name: "FK_Workspaces_AspNetUsers_CreatedById",
+                        column: x => x.CreatedById,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
@@ -186,14 +186,14 @@ namespace API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     WorkspaceId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OwnerId = table.Column<int>(type: "int", nullable: false)
+                    CreatedById = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Boards", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Boards_AspNetUsers_OwnerId",
-                        column: x => x.OwnerId,
+                        name: "FK_Boards_AspNetUsers_CreatedById",
+                        column: x => x.CreatedById,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
@@ -201,6 +201,58 @@ namespace API.Migrations
                         name: "FK_Boards_Workspaces_WorkspaceId",
                         column: x => x.WorkspaceId,
                         principalTable: "Workspaces",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WorkspaceMembers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    WorkspaceId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WorkspaceMembers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_WorkspaceMembers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_WorkspaceMembers_Workspaces_WorkspaceId",
+                        column: x => x.WorkspaceId,
+                        principalTable: "Workspaces",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BoardMembers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    BoardId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BoardMembers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BoardMembers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BoardMembers_Boards_BoardId",
+                        column: x => x.BoardId,
+                        principalTable: "Boards",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -215,14 +267,14 @@ namespace API.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    OwnerId = table.Column<int>(type: "int", nullable: false)
+                    CreatedById = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Cards", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Cards_AspNetUsers_OwnerId",
-                        column: x => x.OwnerId,
+                        name: "FK_Cards_AspNetUsers_CreatedById",
+                        column: x => x.CreatedById,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
@@ -274,9 +326,19 @@ namespace API.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Boards_OwnerId",
+                name: "IX_BoardMembers_BoardId",
+                table: "BoardMembers",
+                column: "BoardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BoardMembers_UserId",
+                table: "BoardMembers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Boards_CreatedById",
                 table: "Boards",
-                column: "OwnerId");
+                column: "CreatedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Boards_WorkspaceId",
@@ -289,14 +351,24 @@ namespace API.Migrations
                 column: "BoardId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Cards_OwnerId",
+                name: "IX_Cards_CreatedById",
                 table: "Cards",
-                column: "OwnerId");
+                column: "CreatedById");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Workspaces_OwnerId",
+                name: "IX_WorkspaceMembers_UserId",
+                table: "WorkspaceMembers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WorkspaceMembers_WorkspaceId",
+                table: "WorkspaceMembers",
+                column: "WorkspaceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Workspaces_CreatedById",
                 table: "Workspaces",
-                column: "OwnerId");
+                column: "CreatedById");
         }
 
         /// <inheritdoc />
@@ -318,7 +390,13 @@ namespace API.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "BoardMembers");
+
+            migrationBuilder.DropTable(
                 name: "Cards");
+
+            migrationBuilder.DropTable(
+                name: "WorkspaceMembers");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
