@@ -16,7 +16,16 @@ public partial class Index
 
     protected override async Task OnParametersSetAsync()
     {
-        cards = await CardService.GetCardsByBoardId(BoardId);
+        try
+        {
+            cards = await CardService.GetCardsByBoardId(BoardId);
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                NavigationManager.NavigateTo("/login");
+            Console.WriteLine(ex);
+        }
     }
 
     private void CreateCard()

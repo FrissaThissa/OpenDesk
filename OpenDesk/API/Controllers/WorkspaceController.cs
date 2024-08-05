@@ -22,6 +22,9 @@ public class WorkspaceController : ControllerBase
     public async Task<IActionResult> Get()
     {
         IEnumerable<WorkspaceDto>? workspaces = await _workspaceService.GetAllWorkspacesDtoAsync();
+        if(workspaces == null)
+            return NotFound();
+
         return Ok(workspaces);
     }
 
@@ -43,6 +46,7 @@ public class WorkspaceController : ControllerBase
         WorkspaceDto? dto = await _workspaceService.CreateWorkspaceAsync(workspace);
         if (dto == null)
             return NotFound();
+
         return Ok(dto);
     }
 
@@ -53,6 +57,7 @@ public class WorkspaceController : ControllerBase
         WorkspaceDto? dto = await _workspaceService.EditWorkspaceAsync(workspace);
         if (dto == null)
             return NotFound();
+
         return Ok(dto);
     }
 

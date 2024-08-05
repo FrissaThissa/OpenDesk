@@ -23,6 +23,9 @@ public class CardController : ControllerBase
     public async Task<IActionResult> Get()
     {
         IEnumerable<CardDto>? cards = await _cardService.GetAllCardsDtoAsync();
+        if (cards == null)
+            return NotFound();
+
         return Ok(cards);
     }
 
@@ -41,8 +44,11 @@ public class CardController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetCardsByBoardId(int boardId)
     {
-        var boards = await _cardService.GetCardsDtoByBoardIdAsync(boardId);
-        return Ok(boards);
+        IEnumerable<CardDto>? cards = await _cardService.GetCardsDtoByBoardIdAsync(boardId);
+        if (cards == null)
+            return NotFound();
+
+        return Ok(cards);
     }
 
     [HttpPost]
@@ -51,7 +57,8 @@ public class CardController : ControllerBase
     {
         CardDto? dto = await _cardService.CreateCardAsync(card);
         if (dto == null)
-            return Forbid();
+            return NotFound();
+
         return Ok(dto);
     }
 
@@ -61,7 +68,8 @@ public class CardController : ControllerBase
     {
         CardDto? dto = await _cardService.EditCardAsync(card);
         if (dto == null)
-            return Forbid();
+            return NotFound();
+
         return Ok(dto);
     }
 

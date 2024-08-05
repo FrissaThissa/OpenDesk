@@ -16,7 +16,16 @@ public partial class Index
 
     protected override async Task OnParametersSetAsync()
     {
-        boards = await BoardService.GetBoardsByWorkspaceIdAsync(WorkspaceId);
+        try
+        {
+            boards = await BoardService.GetBoardsByWorkspaceIdAsync(WorkspaceId);
+        }
+        catch (HttpRequestException ex) 
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                NavigationManager.NavigateTo("/login");
+            Console.WriteLine(ex);
+        }
     }
 
     private void NavigateToCards(int boardId)

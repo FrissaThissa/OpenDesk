@@ -22,6 +22,9 @@ public class BoardController : ControllerBase
     public async Task<IActionResult> Get()
     {
         IEnumerable<BoardDto>? boards = await _boardService.GetAllBoardsDtoAsync();
+        if (boards == null)
+            return NotFound();
+
         return Ok(boards);
     }
 
@@ -40,7 +43,10 @@ public class BoardController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetBoardsByWorkspaceId(int workspaceId)
     {
-        var boards = await _boardService.GetBoardsDtoByWorkspaceIdAsync(workspaceId);
+        IEnumerable<BoardDto>? boards = await _boardService.GetBoardsDtoByWorkspaceIdAsync(workspaceId);
+        if (boards == null)
+            return NotFound();
+
         return Ok(boards);
     }
 
@@ -50,7 +56,8 @@ public class BoardController : ControllerBase
     {
         BoardDto? dto = await _boardService.CreateBoardAsync(board);
         if(dto == null)
-            return Forbid();
+            return NotFound();
+
         return Ok(dto);
     }
 
@@ -60,7 +67,8 @@ public class BoardController : ControllerBase
     {
         BoardDto? dto = await _boardService.EditBoardAsync(board);
         if (dto == null)
-            return Forbid();
+            return NotFound();
+
         return Ok();
     }
 
