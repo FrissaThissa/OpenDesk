@@ -1,0 +1,23 @@
+﻿@page "/board/edit/{boardId:int}"
+
+@using Microsoft.AspNetCore.Components.Forms;
+
+@if(boardDto != null)
+{
+    <EditForm Model="boardDto" OnValidSubmit="PutBoard">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="name">Name</label>
+            <InputText id="name" class="form-control" @bind-Value="boardDto.Name" />
+            <ValidationMessage For="@(() => boardDto.Name)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Edit</button>
+    </EditForm>
+}
+else
+{
+    <p>Loading...</p>
+}

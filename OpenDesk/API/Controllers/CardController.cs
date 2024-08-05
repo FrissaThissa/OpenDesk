@@ -49,16 +49,20 @@ public class CardController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Create(CardDto card)
     {
-        await _cardService.CreateCardAsync(card);
-        return Ok();
+        CardDto? dto = await _cardService.CreateCardAsync(card);
+        if (dto == null)
+            return Forbid();
+        return Ok(dto);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut]
     [Authorize]
     public async Task<IActionResult> Edit(CardDto card)
     {
-        await _cardService.EditCardAsync(card);
-        return Ok();
+        CardDto? dto = await _cardService.EditCardAsync(card);
+        if (dto == null)
+            return Forbid();
+        return Ok(dto);
     }
 
     [HttpDelete("{id}")]

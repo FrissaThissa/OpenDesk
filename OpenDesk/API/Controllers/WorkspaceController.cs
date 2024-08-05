@@ -40,16 +40,20 @@ public class WorkspaceController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Create(WorkspaceDto workspace)
     {
-        await _workspaceService.CreateWorkspaceAsync(workspace);
-        return Ok();
+        WorkspaceDto? dto = await _workspaceService.CreateWorkspaceAsync(workspace);
+        if (dto == null)
+            return NotFound();
+        return Ok(dto);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut]
     [Authorize]
-    public async Task<IActionResult> Edit(int id, WorkspaceDto workspace)
+    public async Task<IActionResult> Edit(WorkspaceDto workspace)
     {
-        await _workspaceService.EditWorkspaceAsync(workspace);
-        return Ok();
+        WorkspaceDto? dto = await _workspaceService.EditWorkspaceAsync(workspace);
+        if (dto == null)
+            return NotFound();
+        return Ok(dto);
     }
 
     [HttpDelete("{id}")]

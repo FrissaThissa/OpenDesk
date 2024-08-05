@@ -1,0 +1,23 @@
+﻿@page "/workspace/edit/{workspaceId:int}"
+
+@using Microsoft.AspNetCore.Components.Forms;
+
+@if(workspaceDto != null)
+{
+    <EditForm Model="workspaceDto" OnValidSubmit="PutWorkspace">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="name">Name</label>
+            <InputText id="name" class="form-control" @bind-Value="workspaceDto.Name" />
+            <ValidationMessage For="@(() => workspaceDto.Name)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Edit</button>
+    </EditForm>
+}
+else
+{
+    <p>Loading...</p>
+}

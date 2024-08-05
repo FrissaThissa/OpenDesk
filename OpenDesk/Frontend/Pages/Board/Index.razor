@@ -5,10 +5,12 @@
 
 <div class="row">
     <div class="col-sm-12">
+        <i class="fa fa-plus" @onclick="() => CreateBoard()"></i>
         <table class="table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th></th>
+                    <th></th>
                     <th>Name</th>
                 </tr>
             </thead>
@@ -18,7 +20,8 @@
                     foreach (BoardDto board in boards)
                     {
                         <tr @onclick="() => NavigateToCards(board.Id)">
-                            <td>@board.Id</td>
+                            <td><i class="fa fa-pen" @onclick="() => EditBoard(board.Id)"></i></td>
+                            <td><i class="fa fa-trash" @onclick="() => DeleteBoard(board.Id)"></i></td>
                             <td>@board.Name</td>
                         </tr>
                     }

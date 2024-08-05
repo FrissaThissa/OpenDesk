@@ -2,15 +2,15 @@
 using Microsoft.AspNetCore.Components;
 using Shared.Models;
 
-namespace Frontend.Pages;
+namespace Frontend.Pages.Board;
 
-public partial class Boards
+public partial class Index
 {
     [Parameter]
     public int WorkspaceId { get; set; }
 
     [Inject] public BoardService BoardService { get; set; } = default!;
-    [Inject] public NavigationManager NavigationManager {  get; set; } = default!;
+    [Inject] public NavigationManager NavigationManager { get; set; } = default!;
 
     private IEnumerable<BoardDto>? boards = default!;
 
@@ -22,5 +22,20 @@ public partial class Boards
     private void NavigateToCards(int boardId)
     {
         NavigationManager.NavigateTo($"/cards/{boardId}");
+    }
+
+    private void CreateBoard()
+    {
+        NavigationManager.NavigateTo($"/board/add/{WorkspaceId}");
+    }
+
+    private void EditBoard(int boardId)
+    {
+        NavigationManager.NavigateTo($"/board/edit/{boardId}");
+    }
+
+    private void DeleteBoard(int boardId)
+    {
+        NavigationManager.NavigateTo($"/board/delete/{boardId}");
     }
 }

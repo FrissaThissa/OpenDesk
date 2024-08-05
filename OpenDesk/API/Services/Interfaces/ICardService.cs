@@ -8,7 +8,7 @@ public interface ICardService
     Task<CardDto?> GetCardDtoByIdAsync(int id);
     Task<IEnumerable<CardDto>?> GetCardsDtoByBoardIdAsync(int id);
     Task<IEnumerable<CardDto>?> GetCardsDtoByWorkspaceIdAsync(int id);
-    Task CreateCardAsync(CardDto card);
-    Task EditCardAsync(CardDto card);
+    Task<CardDto?> CreateCardAsync(CardDto card);
+    Task<CardDto?> EditCardAsync(CardDto card);
     Task DeleteCardAsync(int id);
 }

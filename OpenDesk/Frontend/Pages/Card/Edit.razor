@@ -1,0 +1,23 @@
+﻿@page "/card/edit/{cardId:int}"
+
+@using Microsoft.AspNetCore.Components.Forms;
+
+@if(cardDto != null)
+{
+    <EditForm Model="cardDto" OnValidSubmit="PutCard">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="title">Title</label>
+            <InputText id="name" class="form-control" @bind-Value="cardDto.Title" />
+            <ValidationMessage For="@(() => cardDto.Title)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Edit</button>
+    </EditForm>
+}
+else
+{
+    <p>Loading...</p>
+}

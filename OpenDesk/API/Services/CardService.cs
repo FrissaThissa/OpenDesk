@@ -74,11 +74,11 @@ public class CardService : ServiceBase, ICardService
         return ConvertListToDto(cards);
     }
 
-    public async Task CreateCardAsync(CardDto dto)
+    public async Task<CardDto?> CreateCardAsync(CardDto dto)
     {
         ApplicationUser? user = await GetCurrentUser();
         if (user == null)
-            return;
+            return null;
 
         Card card = ConvertDtoToObject(dto);
 
@@ -86,18 +86,20 @@ public class CardService : ServiceBase, ICardService
 
         _context.Cards.Add(card);
         await _context.SaveChangesAsync();
+        return dto;
     }
 
-    public async Task EditCardAsync(CardDto dto)
+    public async Task<CardDto?> EditCardAsync(CardDto dto)
     {
-        Card card = ConvertDtoToObject(dto);
+        Card? card = await GetCardByIdAsync(dto.Id);
+        if (card == null)
+            return null;
 
-        Card? dbCard = await GetCardByIdAsync(card.Id);
-        if (dbCard == null)
-            return;
+        card.Title = dto.Title;
 
         _context.Cards.Update(card);
         await _context.SaveChangesAsync();
+        return dto;
     }
 
     public async Task DeleteCardAsync(int id)
@@ -134,7 +136,8 @@ public class CardService : ServiceBase, ICardService
                 Id = card.CreatedBy.Id,
                 Name = card.CreatedBy.UserName,
                 Email = card.CreatedBy.Email
-            }
+            },
+            BoardId = card.BoardId
         };
         return dto;
     }
@@ -151,7 +154,8 @@ public class CardService : ServiceBase, ICardService
             Id = dto.Id,
             Title = dto.Title,
             Description = dto.Description,
-            CreatedDate = dto.CreatedDate
+            CreatedDate = dto.CreatedDate,
+            BoardId = dto.BoardId
         };
         return card;
     }

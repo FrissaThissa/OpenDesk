@@ -63,11 +63,11 @@ public class BoardService : ServiceBase, IBoardService
         return ConvertListToDto(boards);
     }
 
-    public async Task CreateBoardAsync(BoardDto dto)
+    public async Task<BoardDto?> CreateBoardAsync(BoardDto dto)
     {
         ApplicationUser? user = await GetCurrentUser();
         if (user == null)
-            return;
+            return null;
 
         Board board = ConvertDtoToObject(dto);
         board.CreatedBy = user;
@@ -81,18 +81,20 @@ public class BoardService : ServiceBase, IBoardService
         _context.BoardMembers.Add(member);
 
         await _context.SaveChangesAsync();
+        return dto;
     }
 
-    public async Task EditBoardAsync(BoardDto dto)
+    public async Task<BoardDto?> EditBoardAsync(BoardDto dto)
     {
-        Board board = ConvertDtoToObject(dto);
+        Board? board = await GetBoardByIdAsync(dto.Id);
+        if (board == null)
+            return null;
 
-        Board? dbBoard = await GetBoardByIdAsync(board.Id);
-        if (dbBoard == null)
-            return;
+        board.Name = dto.Name;
 
         _context.Boards.Update(board);
         await _context.SaveChangesAsync();
+        return dto;
     }
 
     public async Task DeleteBoardAsync(int id)
@@ -128,7 +130,8 @@ public class BoardService : ServiceBase, IBoardService
                 Id = board.CreatedBy.Id,
                 Name = board.CreatedBy.UserName,
                 Email = board.CreatedBy.Email
-            }
+            },
+            WorkspaceId = board.WorkspaceId
         };
         return dto;
     }
@@ -143,7 +146,8 @@ public class BoardService : ServiceBase, IBoardService
         Board board = new Board()
         {
             Id = dto.Id,
-            Name = dto.Name
+            Name = dto.Name,
+            WorkspaceId = dto.WorkspaceId
         };
         return board;
     }

@@ -16,6 +16,11 @@ public class WorkspaceService
         return await _apiService.GetAsync<IEnumerable<WorkspaceDto>>("Workspace");
     }
 
+    public async Task<WorkspaceDto?> GetWorkspaceById(int id)
+    {
+        return await _apiService.GetAsync<WorkspaceDto>($"Workspace/{id}");
+    }
+
     public async Task<WorkspaceDto?> CreateWorkspaceAsync(WorkspaceDto workspace)
     {
         return await _apiService.PostAsync<WorkspaceDto>("Workspace", workspace);

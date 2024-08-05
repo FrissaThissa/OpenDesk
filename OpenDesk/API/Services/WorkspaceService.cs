@@ -50,11 +50,11 @@ public class WorkspaceService : ServiceBase, IWorkspaceService
         return ConvertObjectToDto(workspace);
     }
 
-    public async Task CreateWorkspaceAsync(WorkspaceDto dto)
+    public async Task<WorkspaceDto?> CreateWorkspaceAsync(WorkspaceDto dto)
     {
         ApplicationUser? user = await GetCurrentUser();
         if (user == null)
-            return;
+            return null;
 
         Workspace workspace = ConvertDtoToObject(dto);
         workspace.CreatedBy = user;
@@ -68,18 +68,20 @@ public class WorkspaceService : ServiceBase, IWorkspaceService
         _context.WorkspaceMembers.Add(member);
 
         await _context.SaveChangesAsync();
+        return dto;
     }
 
-    public async Task EditWorkspaceAsync(WorkspaceDto dto)
+    public async Task<WorkspaceDto?> EditWorkspaceAsync(WorkspaceDto dto)
     {
-        Workspace workspace = ConvertDtoToObject(dto);
+        Workspace? workspace = await GetWorkspaceByIdAsync(dto.Id);
+        if (workspace == null)
+            return dto;
 
-        Workspace? dbWorkspace = await GetWorkspaceByIdAsync(workspace.Id);
-        if (dbWorkspace == null)
-            return;
+        workspace.Name = dto.Name;
 
         _context.Workspaces.Update(workspace);
         await _context.SaveChangesAsync();
+        return dto;
     }
 
     public async Task DeleteWorkspaceAsync(int id)

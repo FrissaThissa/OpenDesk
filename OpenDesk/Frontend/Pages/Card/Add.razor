@@ -1,0 +1,16 @@
+﻿@page "/card/add/{boardId:int}"
+
+@using Microsoft.AspNetCore.Components.Forms;
+
+<EditForm Model="cardDto" OnValidSubmit="PostCard">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="title">Title</label>
+        <InputText id="title" class="form-control" @bind-Value="cardDto.Title" />
+        <ValidationMessage For="@(() => cardDto.Title)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</EditForm>

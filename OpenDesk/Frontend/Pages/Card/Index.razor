@@ -5,10 +5,12 @@
 
 <div class="row">
     <div class="col-sm-12">
+        <i class="fa fa-plus" @onclick="() => CreateCard()"></i>
         <table class="table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th></th>
+                    <th></th>
                     <th>Title</th>
                 </tr>
             </thead>
@@ -18,7 +20,8 @@
                     foreach (CardDto card in cards)
                     {
                         <tr>
-                            <td>@card.Id</td>
+                            <td><i class="fa fa-pen" @onclick="() => EditCard(card.Id)"></i></td>
+                            <td><i class="fa fa-trash" @onclick="() => DeleteCard(card.Id)"></i></td>
                             <td>@card.Title</td>
                         </tr>
                     }

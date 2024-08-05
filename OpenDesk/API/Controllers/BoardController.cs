@@ -48,15 +48,19 @@ public class BoardController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Create(BoardDto board)
     {
-        await _boardService.CreateBoardAsync(board);
-        return Ok();
+        BoardDto? dto = await _boardService.CreateBoardAsync(board);
+        if(dto == null)
+            return Forbid();
+        return Ok(dto);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut]
     [Authorize]
-    public async Task<IActionResult> Edit(int id, BoardDto board)
+    public async Task<IActionResult> Edit(BoardDto board)
     {
-        await _boardService.EditBoardAsync(board);
+        BoardDto? dto = await _boardService.EditBoardAsync(board);
+        if (dto == null)
+            return Forbid();
         return Ok();
     }
 

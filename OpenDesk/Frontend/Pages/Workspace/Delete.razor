@@ -1,0 +1,21 @@
+﻿@page "/workspace/delete/{workspaceId:int}"
+
+@using Microsoft.AspNetCore.Components.Forms;
+
+@if (workspaceDto != null)
+{
+    <EditForm Model="workspaceDto" OnValidSubmit="DeleteWorkspace">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div>
+            Are you sure you want to delete workspace @workspaceDto.Name?
+        </div>
+
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </EditForm>
+}
+else
+{
+    <p>Loading...</p>
+}

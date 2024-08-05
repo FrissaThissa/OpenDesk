@@ -7,7 +7,7 @@ public interface IBoardService
     Task<IEnumerable<BoardDto>?> GetAllBoardsDtoAsync();
     Task<BoardDto?> GetBoardDtoByIdAsync(int id);
     Task<IEnumerable<BoardDto>?> GetBoardsDtoByWorkspaceIdAsync(int id);
-    Task CreateBoardAsync(BoardDto board);
-    Task EditBoardAsync(BoardDto board);
+    Task<BoardDto?> CreateBoardAsync(BoardDto board);
+    Task<BoardDto?> EditBoardAsync(BoardDto board);
     Task DeleteBoardAsync(int id);
 }

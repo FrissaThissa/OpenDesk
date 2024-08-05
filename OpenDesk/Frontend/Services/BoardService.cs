@@ -11,6 +11,11 @@ public class BoardService
         _apiService = apiService;
     }
 
+    public async Task<BoardDto?> GetBoardById(int id)
+    {
+        return await _apiService.GetAsync<BoardDto>($"Board/{id}");
+    }
+
     public async Task<IEnumerable<BoardDto>?> GetBoardsByWorkspaceIdAsync(int id)
     {
         return await _apiService.GetAsync<IEnumerable<BoardDto>>($"Board/workspace/{id}");
@@ -26,8 +31,8 @@ public class BoardService
         return await _apiService.PutAsync<BoardDto>("Board", board);
     }
 
-    public async Task<bool> DeleteBoardAsync(int id)
+    public async Task<bool> DeleteBoardAsync(BoardDto board)
     {
-        return await _apiService.DeleteAsync($"Board/{id}");
+        return await _apiService.DeleteAsync($"Board/{board.Id}");
     }
 }

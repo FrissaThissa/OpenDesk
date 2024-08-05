@@ -6,10 +6,12 @@
 
 <div class="row">
     <div class="col-sm-12">
+        <i class="fa fa-plus" @onclick="() => CreateWorkspace()"></i>
         <table class="table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th></th>
+                    <th></th>
                     <th>Name</th>
                 </tr>
             </thead>
@@ -20,7 +22,8 @@
                         foreach (WorkspaceDto workspace in workspaces)
                         {
                             <tr @onclick="() => NavigateToBoards(workspace.Id)">
-                                <td>@workspace.Id</td>
+                                <td><i class="fa fa-pen" @onclick="() => EditWorkspace(workspace.Id)"></i></td>
+                                <td><i class="fa fa-trash" @onclick="() => DeleteWorkspace(workspace.Id)"></i></td>
                                 <td>@workspace.Name</td>
                             </tr>
                         }

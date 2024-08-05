@@ -1,0 +1,16 @@
+﻿@page "/workspace/add"
+
+@using Microsoft.AspNetCore.Components.Forms;
+
+<EditForm Model="workspaceDto" OnValidSubmit="PostWorkspace">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="workspaceDto.Name" />
+        <ValidationMessage For="@(() => workspaceDto.Name)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</EditForm>

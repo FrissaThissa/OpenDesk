@@ -3,7 +3,7 @@ using Frontend.Services;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
 
-namespace Frontend.Pages;
+namespace Frontend.Pages.Auth;
 
 public partial class Login
 {
