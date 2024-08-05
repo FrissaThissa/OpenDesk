@@ -12,7 +12,7 @@ public class BoardController : ControllerBase
 {
     private readonly IBoardService _boardService;
 
-    public BoardController(IBoardService boardService, IUserService userService) 
+    public BoardController(IBoardService boardService) 
     {
         _boardService = boardService;
     }

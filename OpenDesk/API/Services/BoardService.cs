@@ -8,19 +8,20 @@ using API.Extensions;
 
 namespace API.Services;
 
-public class BoardService : ServiceBase, IBoardService
+public class BoardService : IBoardService
 {
     private readonly OpenDeskContext _context;
+    private readonly IUserService _userService;
 
-    public BoardService(OpenDeskContext context, IHttpContextAccessor httpContextAccessor, IUserService userService) 
-        : base(httpContextAccessor, userService)
+    public BoardService(OpenDeskContext context, IUserService userService)
     {
         _context = context;
+        _userService = userService;
     }
 
     public async Task<IEnumerable<BoardDto>?> GetAllBoardsDtoAsync()
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -34,7 +35,7 @@ public class BoardService : ServiceBase, IBoardService
 
     public async Task<BoardDto?> GetBoardDtoByIdAsync(int id)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -51,7 +52,7 @@ public class BoardService : ServiceBase, IBoardService
 
     public async Task<IEnumerable<BoardDto>?> GetBoardsDtoByWorkspaceIdAsync(int id)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -65,7 +66,7 @@ public class BoardService : ServiceBase, IBoardService
 
     public async Task<BoardDto?> CreateBoardAsync(BoardDto dto)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -109,7 +110,7 @@ public class BoardService : ServiceBase, IBoardService
 
     private async Task<Board?> GetBoardByIdAsync(int id)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 

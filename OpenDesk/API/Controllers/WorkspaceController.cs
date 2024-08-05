@@ -12,7 +12,7 @@ public class WorkspaceController : ControllerBase
 {
     private readonly IWorkspaceService _workspaceService;
 
-    public WorkspaceController(IWorkspaceService workspaceService, IUserService userService)
+    public WorkspaceController(IWorkspaceService workspaceService)
     {
         _workspaceService = workspaceService;
     }

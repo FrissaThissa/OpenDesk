@@ -13,7 +13,7 @@ public class CardController : ControllerBase
 {
     private readonly ICardService _cardService;
 
-    public CardController(ICardService cardService, IUserService userService)
+    public CardController(ICardService cardService)
     {
         _cardService = cardService;
     }

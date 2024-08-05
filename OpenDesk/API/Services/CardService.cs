@@ -7,19 +7,20 @@ using API.Models.Auth;
 
 namespace API.Services;
 
-public class CardService : ServiceBase, ICardService
+public class CardService : ICardService
 {
     private readonly OpenDeskContext _context;
+    private readonly IUserService _userService;
 
-    public CardService(OpenDeskContext context, IHttpContextAccessor httpContextAccessor, IUserService userService) 
-        : base(httpContextAccessor, userService)
+    public CardService(OpenDeskContext context, IUserService userService)
     {
         _context = context;
+        _userService = userService;
     }
 
     public async Task<IEnumerable<CardDto>?> GetAllCardsDtoAsync()
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -32,7 +33,7 @@ public class CardService : ServiceBase, ICardService
 
     public async Task<CardDto?> GetCardDtoByIdAsync(int id)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -48,7 +49,7 @@ public class CardService : ServiceBase, ICardService
 
     public async Task<IEnumerable<CardDto>?> GetCardsDtoByBoardIdAsync(int id)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -62,7 +63,7 @@ public class CardService : ServiceBase, ICardService
 
     public async Task<IEnumerable<CardDto>?> GetCardsDtoByWorkspaceIdAsync(int id)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -76,7 +77,7 @@ public class CardService : ServiceBase, ICardService
 
     public async Task<CardDto?> CreateCardAsync(CardDto dto)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -114,7 +115,7 @@ public class CardService : ServiceBase, ICardService
 
     private async Task<Card?> GetCardByIdAsync(int id)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 

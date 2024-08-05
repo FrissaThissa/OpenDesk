@@ -7,19 +7,20 @@ using API.Models.Auth;
 
 namespace API.Services;
 
-public class WorkspaceService : ServiceBase, IWorkspaceService
+public class WorkspaceService : IWorkspaceService
 {
     private readonly OpenDeskContext _context;
+    private readonly IUserService _userService;
 
-    public WorkspaceService(OpenDeskContext context, IHttpContextAccessor httpContextAccessor, IUserService userService) 
-        : base(httpContextAccessor, userService)
+    public WorkspaceService(OpenDeskContext context, IUserService userService) 
     {
         _context = context; 
+        _userService = userService;
     }
 
     public async Task<IEnumerable<WorkspaceDto>?> GetAllWorkspacesDtoAsync()
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -34,7 +35,7 @@ public class WorkspaceService : ServiceBase, IWorkspaceService
 
     public async Task<WorkspaceDto?> GetWorkspaceDtoByIdAsync(int id)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -52,7 +53,7 @@ public class WorkspaceService : ServiceBase, IWorkspaceService
 
     public async Task<WorkspaceDto?> CreateWorkspaceAsync(WorkspaceDto dto)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 
@@ -96,7 +97,7 @@ public class WorkspaceService : ServiceBase, IWorkspaceService
 
     private async Task<Workspace?> GetWorkspaceByIdAsync(int id)
     {
-        ApplicationUser? user = await GetCurrentUser();
+        ApplicationUser? user = await _userService.GetCurrentUser();
         if (user == null)
             return null;
 

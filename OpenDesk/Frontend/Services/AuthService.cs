@@ -9,11 +9,13 @@ public class AuthService
 {
     private readonly HttpClient _httpClient;
     private readonly ILocalStorageService localStorage;
+    private readonly StateService _stateService;
 
-    public AuthService(HttpClient httpClient, ILocalStorageService localStorage)
+    public AuthService(HttpClient httpClient, ILocalStorageService localStorage, StateService stateService)
     {
         _httpClient = httpClient;
         this.localStorage = localStorage;
+        _stateService = stateService;
     }
 
     public async Task PostLogin(LoginRequest request)
@@ -31,8 +33,10 @@ public class AuthService
 
                 var content = await response.Content.ReadAsStringAsync();
                 AuthToken? token = JsonConvert.DeserializeObject<AuthToken>(content);
-                if(token != null) 
-                    await localStorage.SetItemAsync("authToken", token);
+                if (token == null)
+                    return;
+
+                await localStorage.SetItemAsync("authToken", token);
             }
             else
             {

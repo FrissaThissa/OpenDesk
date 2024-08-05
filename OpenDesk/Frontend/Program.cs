@@ -20,8 +20,11 @@ builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<ApiService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<WorkspaceService>();
 builder.Services.AddScoped<BoardService>();
 builder.Services.AddScoped<CardService>();
+
+builder.Services.AddSingleton<StateService>();
 
 await builder.Build().RunAsync();
