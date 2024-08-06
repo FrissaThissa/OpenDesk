@@ -13,6 +13,9 @@ public class AuthService
     private readonly StateService _stateService;
     private readonly UserService _userService;
 
+    private readonly TimeSpan _refreshBuffer = TimeSpan.FromMinutes(5); // Refresh 5 minutes before expiry
+    private Timer? _timer = null;
+
     public AuthService(HttpClient httpClient, ILocalStorageService localStorage, StateService stateService, UserService userService)
     {
         _httpClient = httpClient;
@@ -46,6 +49,8 @@ public class AuthService
                     return;
 
                 _stateService.User = user;
+
+                await StartRefreshAsync();
             }
             else
             {
@@ -59,7 +64,27 @@ public class AuthService
         }
     }
 
-    public async Task TryRefreshToken()
+    public async Task StartRefreshAsync(bool initialRefresh = false)
+    {
+        if (_timer != null)
+            return;
+        if(initialRefresh)
+            TryRefreshToken(null);
+        await SetTimerAsync();
+    }
+
+    private async Task SetTimerAsync()
+    {
+        var token = await _localStorage.GetItemAsync<AuthToken>("authToken");
+        if (token == null)
+            return;
+
+        var expiresIn = TimeSpan.FromSeconds(token.ExpiresIn);
+        var refreshTime = expiresIn - _refreshBuffer;
+        _timer = new Timer(TryRefreshToken, null, refreshTime, Timeout.InfiniteTimeSpan);
+    }
+
+    private async void TryRefreshToken(object? state)
     {
         AuthToken? token = await _localStorage.GetItemAsync<AuthToken>("authToken");
         if (token == null)
@@ -91,6 +116,8 @@ public class AuthService
                     return;
 
                 _stateService.User = user;
+
+                await SetTimerAsync();
             }
         }
         catch (Exception ex)
