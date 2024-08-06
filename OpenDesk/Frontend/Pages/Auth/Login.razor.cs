@@ -21,12 +21,6 @@ public partial class Login
         if (!loginRequest.Success)
             return;
 
-        UserDto? user = await UserService.GetCurrentUserAsync();
-        if (user == null)
-            return;
-
-        StateService.User = user;
-
         Navigation.NavigateTo("/");
     }
 }
