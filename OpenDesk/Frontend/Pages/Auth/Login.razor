@@ -6,24 +6,35 @@
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <div class="form-group">
-        <label for="email">Email</label>
-        <InputText id="email" class="form-control" @bind-Value="loginRequest.Email" />
-        <ValidationMessage For="@(() => loginRequest.Email)" />
-    </div>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title text-center">Login</h3>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <InputText id="email" class="form-control" @bind-Value="loginRequest.Email" />
+                            <ValidationMessage For="@(() => loginRequest.Email)" />
+                        </div>
 
-    <div class="form-group">
-        <label for="password">Password</label>
-        <InputText id="password" type="password" class="form-control" @bind-Value="loginRequest.Password" />
-        <ValidationMessage For="@(() => loginRequest.Password)" />
-    </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <InputText id="password" type="password" class="form-control" @bind-Value="loginRequest.Password" />
+                            <ValidationMessage For="@(() => loginRequest.Password)" />
+                        </div>
 
-    <button type="submit" class="btn btn-primary">Login</button>
+                        <button type="submit" class="btn btn-primary btn-block">Login</button>
 
-    @if (!string.IsNullOrEmpty(loginRequest.ErrorMessage))
-    {
-        <div class="alert alert-danger mt-3" role="alert">
-            @loginRequest.ErrorMessage
+                        @if (!string.IsNullOrEmpty(loginRequest.ErrorMessage))
+                        {
+                            <div class="alert alert-danger mt-3" role="alert">
+                                @loginRequest.ErrorMessage
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
-    }
+    </div>
 </EditForm>
