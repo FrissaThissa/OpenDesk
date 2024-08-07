@@ -1,8 +1,8 @@
 ﻿using Frontend.Models.Auth;
 using System.Net.Http.Json;
 using Blazored.LocalStorage;
-using Newtonsoft.Json;
 using Shared.Models;
+using System.Text.Json;
 
 namespace Frontend.Services;
 
@@ -10,16 +10,23 @@ public class AuthService
 {
     private readonly HttpClient _httpClient;
     private readonly ILocalStorageService _localStorage;
+    private readonly ApiService _apiService;
     private readonly StateService _stateService;
     private readonly UserService _userService;
+
+    private readonly JsonSerializerOptions _options = new JsonSerializerOptions
+    {
+        PropertyNameCaseInsensitive = true
+    };
 
     private readonly TimeSpan _refreshBuffer = TimeSpan.FromMinutes(5); // Refresh 5 minutes before expiry
     private Timer? _timer = null;
 
-    public AuthService(HttpClient httpClient, ILocalStorageService localStorage, StateService stateService, UserService userService)
+    public AuthService(HttpClient httpClient, ILocalStorageService localStorage, ApiService apiService, StateService stateService, UserService userService)
     {
         _httpClient = httpClient;
         _localStorage = localStorage;
+        _apiService = apiService;
         _stateService = stateService;
         _userService = userService;
     }
@@ -38,7 +45,7 @@ public class AuthService
                 request.Success = true;
 
                 var content = await response.Content.ReadAsStringAsync();
-                AuthToken? token = JsonConvert.DeserializeObject<AuthToken>(content);
+                AuthToken? token = JsonSerializer.Deserialize<AuthToken>(content, _options);
                 if (token == null)
                     return;
 
@@ -60,7 +67,7 @@ public class AuthService
         catch (Exception ex)
         {
             request.ErrorMessage = "Login failed. Please try again later.";
-            //TODO: Log error
+            Console.WriteLine(ex);
         }
     }
 
@@ -105,7 +112,7 @@ public class AuthService
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                AuthToken? newtoken = JsonConvert.DeserializeObject<AuthToken>(content);
+                AuthToken? newtoken = JsonSerializer.Deserialize<AuthToken>(content, _options);
                 if (newtoken == null)
                     return;
 
@@ -122,7 +129,7 @@ public class AuthService
         }
         catch (Exception ex)
         {
-            //TODO: Log error
+            Console.WriteLine(ex);
         }
     }
 }
