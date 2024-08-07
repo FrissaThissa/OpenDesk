@@ -17,7 +17,7 @@ public partial class Login
 
     private async Task PostLogin()
     {
-        await AuthService.PostLogin(loginRequest);
+        await AuthService.Login(loginRequest);
         if (!loginRequest.Success)
             return;
 

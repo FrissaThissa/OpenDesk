@@ -9,9 +9,18 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/workspaces">Workspaces</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/login">Login</a>
-                </li>
+                @if(StateService.User == null)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" @onclick="Logout">Logout</a>
+                    </li>
+                }
             </ul>
         </div>
     </div>

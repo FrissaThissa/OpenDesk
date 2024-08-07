@@ -10,7 +10,6 @@ public class AuthService
 {
     private readonly HttpClient _httpClient;
     private readonly ILocalStorageService _localStorage;
-    private readonly ApiService _apiService;
     private readonly StateService _stateService;
     private readonly UserService _userService;
 
@@ -22,16 +21,15 @@ public class AuthService
     private readonly TimeSpan _refreshBuffer = TimeSpan.FromMinutes(5); // Refresh 5 minutes before expiry
     private Timer? _timer = null;
 
-    public AuthService(HttpClient httpClient, ILocalStorageService localStorage, ApiService apiService, StateService stateService, UserService userService)
+    public AuthService(HttpClient httpClient, ILocalStorageService localStorage, StateService stateService, UserService userService)
     {
         _httpClient = httpClient;
         _localStorage = localStorage;
-        _apiService = apiService;
         _stateService = stateService;
         _userService = userService;
     }
 
-    public async Task PostLogin(LoginRequest request)
+    public async Task Login(LoginRequest request)
     {
         try
         {
@@ -69,6 +67,17 @@ public class AuthService
             request.ErrorMessage = "Login failed. Please try again later.";
             Console.WriteLine(ex);
         }
+    }
+
+    public async Task Logout()
+    {
+        await _localStorage.RemoveItemAsync("authToken");
+        if (_timer != null)
+        {
+            _timer.Dispose();
+            _timer = null;
+        }
+        _stateService.User = null;
     }
 
     public async Task StartRefreshAsync(bool initialRefresh = false)
